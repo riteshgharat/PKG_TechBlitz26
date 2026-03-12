@@ -1,0 +1,19 @@
+{
+  "name": "whatsapp-channel",
+  "version": "1.0.0",
+  "description": "WhatsApp bot for Smart Clinic scheduling using whatsapp-web.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/bot.ts",
+    "start": "tsx src/bot.ts"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.26.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.0.0"
+  }
+}
