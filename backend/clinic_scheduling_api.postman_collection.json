@@ -1,0 +1,569 @@
+{
+	"info": {
+		"_postman_id": "8b5c5e5c-0b5c-4b5c-8b5c-5e5c0b5c4b5c",
+		"name": "Clinic Scheduling API",
+		"description": "Postman collection for the Clinic Scheduling Backend (Bun + Prisma + PostgreSQL)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Request OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.otp) {",
+									"    pm.collectionVariables.set('otp', jsonData.data.otp);",
+									"    console.log('OTP saved: ' + jsonData.data.otp);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"9876543210\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/request-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "request-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+									"    console.log('Token saved');",
+									"    console.log('User ID: ' + jsonData.data.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"9876543210\",\n    \"otp\": \"{{otp}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "verify-otp"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Get All Doctors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
+									"    pm.collectionVariables.set('doctorId', jsonData.data[0].id);",
+									"    console.log('Doctor ID saved: ' + jsonData.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors",
+							"host": ["{{baseUrl}}"],
+							"path": ["doctors"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors/{{doctorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["doctors", "{{doctorId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor Schedule",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors/{{doctorId}}/schedule",
+							"host": ["{{baseUrl}}"],
+							"path": ["doctors", "{{doctorId}}", "schedule"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Get All Patients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.length > 0) {",
+									"    pm.collectionVariables.set('patientId', jsonData.data[0].id);",
+									"    console.log('Patient ID saved: ' + jsonData.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": ["{{baseUrl}}"],
+							"path": ["patients"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Profile (Auth)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["patients", "profile"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Schedules",
+			"item": [
+				{
+					"name": "Get Schedules by Doctor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/schedules?doctorId={{doctorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["schedules"],
+							"query": [
+								{
+									"key": "doctorId",
+									"value": "{{doctorId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Schedule (Auth: DOCTOR/ADMIN)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"dayOfWeek\": 2,\n    \"startTime\": \"09:00\",\n    \"endTime\": \"17:00\",\n    \"slotDuration\": 30\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/schedules",
+							"host": ["{{baseUrl}}"],
+							"path": ["schedules"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/appointments/slots?doctorId={{doctorId}}&date=2026-03-16",
+							"host": ["{{baseUrl}}"],
+							"path": ["appointments", "slots"],
+							"query": [
+								{
+									"key": "doctorId",
+									"value": "{{doctorId}}"
+								},
+								{
+									"key": "date",
+									"value": "2026-03-16"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book Appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('appointmentId', jsonData.data.id);",
+									"    console.log('Appointment ID saved: ' + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"patientId\": \"{{patientId}}\",\n    \"startTime\": \"2026-03-16T10:00:00.000Z\",\n    \"endTime\": \"2026-03-16T10:30:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/book",
+							"host": ["{{baseUrl}}"],
+							"path": ["appointments", "book"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book Appointment (Clash Test - Same Slot)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"patientId\": \"{{patientId}}\",\n    \"startTime\": \"2026-03-16T10:00:00.000Z\",\n    \"endTime\": \"2026-03-16T10:30:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/book",
+							"host": ["{{baseUrl}}"],
+							"path": ["appointments", "book"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointmentId\": \"{{appointmentId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["appointments", "cancel"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reschedule Appointment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointmentId\": \"{{appointmentId}}\",\n    \"newStartTime\": \"2026-03-16T14:00:00.000Z\",\n    \"newEndTime\": \"2026-03-16T14:30:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/reschedule",
+							"host": ["{{baseUrl}}"],
+							"path": ["appointments", "reschedule"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Today's Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/today",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "today"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "profile"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "otp",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "doctorId",
+			"value": ""
+		},
+		{
+			"key": "patientId",
+			"value": ""
+		},
+		{
+			"key": "appointmentId",
+			"value": ""
+		}
+	]
+}
