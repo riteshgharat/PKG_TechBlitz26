@@ -178,8 +178,8 @@ const DoctorDashboard: React.FC<Props> = ({ onLogout }) => {
         <div className="main">
           <div className="top-row">
             <div className="greeting">
-              <h1>{greet()}, Dr. {doctor?.name?.split(' ')[0] || 'Doctor'}!</h1>
-              <p>Here's your schedule and clinic overview for today.</p>
+              <h1>{greet()}, Dr. {doctor?.name?.split(' ')[0] || 'Kumaar'}!</h1>
+              <p>Here's your schedule and clinic overview.</p>
             </div>
             <button className="edit-profile-btn" onClick={openProfile}><Edit3 size={16} /> Edit Profile</button>
           </div>
@@ -203,10 +203,10 @@ const DoctorDashboard: React.FC<Props> = ({ onLogout }) => {
                 <div className="appt-list">
                   {appointments.map(a => (
                     <div key={a.id} className="appt-item">
-                      <div className="appt-time">{fmt(a.start_time)}</div>
+                      <div className="appt-time">{fmt(a.startTime)}</div>
                       <div className="appt-info">
                         <p className="appt-name">Appointment</p>
-                        <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{fmtDate(a.start_time)}</p>
+                        <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{fmtDate(a.startTime)}</p>
                       </div>
                       <span className={`appt-status ${a.status === 'completed' ? 'st-completed' : a.status === 'cancelled' ? 'st-cancelled' : 'st-booked'}`}>
                         {a.status}

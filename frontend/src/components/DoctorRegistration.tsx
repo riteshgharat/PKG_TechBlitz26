@@ -35,7 +35,7 @@ const DoctorRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
     try {
       await Promise.all([
         saveMyDoctorProfile({ name: name.trim(), specialization: specialization || undefined, qualifications: qualifications.trim() || undefined, experience: experience ? Number(experience) : undefined, consultationFee: consultationFee ? Number(consultationFee) : undefined, bio: bio.trim() || undefined }),
-        updateUserProfile(name.trim()),
+        updateUserProfile(name.trim(), 'doctor'),
       ]);
       onComplete();
     } catch (err) {
@@ -56,6 +56,18 @@ const DoctorRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
         <button style={logoutS} onClick={onLogout}><LogOut size={16} /> Sign Out</button>
       </div>
       <div style={card}>
+        <div style={heroCard}>
+          <div>
+            <div style={heroEyebrow}>Doctor Workspace</div>
+            <h1 style={heroTitle}>Set up your public practice card</h1>
+            <p style={heroCopy}>Show patients your specialty, qualifications, fee structure, and clinical focus before they book.</p>
+          </div>
+          <div style={heroBadge}>
+            <span style={heroBadgeLabel}>Outcome</span>
+            <strong style={heroBadgeValue}>Ready for appointments</strong>
+          </div>
+        </div>
+
         <div style={progRow}>
           {steps.map((label, i) => (
             <div key={label} style={stepItem}>
@@ -74,7 +86,7 @@ const DoctorRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
             <h2 style={ttl}>Personal Information</h2>
             <p style={sub}>Your name and primary specialization.</p>
             <div style={grid}>
-              <div style={full}><label style={lbl}>Full Name *</label><input style={inp} required placeholder="Dr. Jane Smith" value={name} onChange={e => setName(e.target.value)} autoFocus /></div>
+              <div style={full}><label style={lbl}>Full Name *</label><input style={inp} required placeholder="Dr. Aditi Gupta" value={name} onChange={e => setName(e.target.value)} autoFocus /></div>
               <div style={full}>
                 <label style={lbl}>Specialization</label>
                 <select style={inp} value={specialization} onChange={e => setSpecialization(e.target.value)}>
@@ -123,6 +135,13 @@ const logoS: React.CSSProperties = { height: 36, background: 'white', borderRadi
 const brd: React.CSSProperties = { fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: -0.5 };
 const logoutS: React.CSSProperties = { background: 'none', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#64748b', fontFamily: 'inherit' };
 const card: React.CSSProperties = { background: 'white', borderRadius: 24, boxShadow: '0 20px 50px rgba(37,99,235,0.1)', padding: 40, width: '100%', maxWidth: 640 };
+const heroCard: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', gap: 18, alignItems: 'flex-start', padding: 20, borderRadius: 20, border: '1px solid #bbf7d0', background: 'linear-gradient(135deg,#f0fdf4 0%,#f7fee7 100%)', marginBottom: 28 };
+const heroEyebrow: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800, color: '#15803d', marginBottom: 10 };
+const heroTitle: React.CSSProperties = { fontSize: 28, lineHeight: 1.05, fontWeight: 800, color: '#0f172a', margin: '0 0 10px' };
+const heroCopy: React.CSSProperties = { fontSize: 14, color: '#475569', lineHeight: 1.6, margin: 0, maxWidth: 400 };
+const heroBadge: React.CSSProperties = { minWidth: 150, padding: '14px 16px', borderRadius: 16, background: 'white', border: '1px solid #86efac', boxShadow: '0 10px 24px rgba(22,163,74,0.08)' };
+const heroBadgeLabel: React.CSSProperties = { display: 'block', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800, color: '#64748b', marginBottom: 8 };
+const heroBadgeValue: React.CSSProperties = { display: 'block', fontSize: 16, color: '#0f172a' };
 const progRow: React.CSSProperties = { display: 'flex', alignItems: 'center', marginBottom: 36 };
 const stepItem: React.CSSProperties = { display: 'flex', alignItems: 'center', flex: 1, position: 'relative' };
 const stepCircle: React.CSSProperties = { width: 44, height: 44, borderRadius: '50%', border: '2px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', flexShrink: 0, zIndex: 1, background: 'white' };

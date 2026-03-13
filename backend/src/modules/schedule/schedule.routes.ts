@@ -76,18 +76,18 @@ export const scheduleRoutes: Route[] = [
     method: "POST",
     path: "/schedules",
     handler: handleCreateSchedule,
-    middleware: [authMiddleware, roleMiddleware("ADMIN", "DOCTOR")],
+    middleware: [authMiddleware, roleMiddleware("doctor", "receptionist")],
   },
   {
     method: "PATCH",
     path: "/schedules/:id",
     handler: handleUpdateSchedule,
-    middleware: [authMiddleware, roleMiddleware("ADMIN", "DOCTOR")],
+    middleware: [authMiddleware, roleMiddleware("doctor", "receptionist")],
   },
   {
     method: "DELETE",
     path: "/schedules/:id",
     handler: handleDeleteSchedule,
-    middleware: [authMiddleware, roleMiddleware("ADMIN", "DOCTOR")],
+    middleware: [authMiddleware, roleMiddleware("doctor", "receptionist")],
   },
 ];

@@ -38,17 +38,17 @@ interface RescheduleModalState {
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
 function formatLastVisit(iso: string | null) {
   if (!iso) return 'N/A';
   const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
 function getStatusClass(status: string) {
@@ -210,7 +210,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     if (!book.selectedDoctor || !book.selectedSlot) return;
     setBook(prev => ({ ...prev, loading: true, error: '' }));
     try {
-      await bookAppointment(book.selectedDoctor.id, book.selectedSlot.start_time, book.selectedSlot.end_time);
+      await bookAppointment(book.selectedDoctor.id, book.selectedSlot.startTime, book.selectedSlot.endTime);
       setShowBook(false);
       await loadDashboard();
     } catch (e) {
@@ -240,7 +240,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   };
 
   const rescheduleFetchSlots = async () => {
-    if (!reschedule.appointment || !reschedule.date) return;
+    if (!reschedule.appointment?.doctor || !reschedule.date) return;
     setReschedule(prev => ({ ...prev, loading: true, error: '', slots: [], selectedSlot: null }));
     try {
       const slots = await getAvailableSlots(reschedule.appointment.doctor.id, reschedule.date);
@@ -254,7 +254,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     if (!reschedule.appointment || !reschedule.selectedSlot) return;
     setReschedule(prev => ({ ...prev, loading: true, error: '' }));
     try {
-      await rescheduleAppointment(reschedule.appointment.id, reschedule.selectedSlot.start_time, reschedule.selectedSlot.end_time);
+      await rescheduleAppointment(reschedule.appointment.id, reschedule.selectedSlot.startTime, reschedule.selectedSlot.endTime);
       setShowReschedule(false);
       await loadDashboard();
     } catch (e) {
@@ -576,9 +576,11 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             color: var(--text-muted);
             font-weight: 600;
             font-size: 13px;
-            background-image: url('https://themes.pixelbuddha.net/monochrome/assets/images/map-placeholder.png');
-            background-size: cover;
-            background-position: center;
+            background: radial-gradient(#e2e8f0 20%, transparent 20%),
+                        radial-gradient(#e2e8f0 20%, transparent 20%);
+            background-color: #f1f5f9;
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
           }
 
           .card { background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(226, 232, 240, 0.6); padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
@@ -802,19 +804,19 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       {getStatusLabel(nextAppointment.status)}
                     </div>
                     <div className="hero-time">
-                      <span>{formatDate(nextAppointment.start_time)}</span>
-                      <h2>{formatTime(nextAppointment.start_time)}</h2>
+                      <span>{formatDate(nextAppointment.startTime)}</span>
+                      <h2>{formatTime(nextAppointment.startTime)}</h2>
                     </div>
                   </div>
                   <div className="hero-doctor">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(nextAppointment.doctor.name)}&background=eff6ff&color=2563eb`}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(nextAppointment.doctor?.name || 'Doctor')}&background=eff6ff&color=2563eb`}
                       className="hero-doc-avatar"
                       alt="Doctor"
                     />
                     <div className="hero-doc-info">
-                      <h3>{nextAppointment.doctor.name}</h3>
-                      <p><Stethoscope size={16} /> {nextAppointment.doctor.specialization}</p>
+                      <h3>{nextAppointment.doctor?.name || 'Doctor'}</h3>
+                      <p><Stethoscope size={16} /> {nextAppointment.doctor?.specialization || 'General Consultant'}</p>
                     </div>
                   </div>
                   <div className="hero-actions">
@@ -844,18 +846,20 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <div className="clinic-icon-box"><MapPin size={22} /></div>
                   <div className="clinic-text">
                     <h4>Clinico Care Central</h4>
-                    <p>124 Health Avenue, Suite 300<br />San Francisco, CA 94103</p>
+                    <p>124, MG Road, Indiranagar<br />Bangalore, KA 560038</p>
                   </div>
                 </div>
                 <div className="clinic-detail-item">
                   <div className="clinic-icon-box"><PhoneCall size={22} /></div>
                   <div className="clinic-text">
                     <h4>Contact Desk</h4>
-                    <p>+1 (555) 123-4567<br />support@clinico.care</p>
+                    <p>+91 98765 43210<br />support@clinico.in</p>
                   </div>
                 </div>
               </div>
-              <div className="clinic-map-placeholder"></div>
+              <div className="clinic-map-placeholder">
+                <span style={{ opacity: 0.5 }}>Map View</span>
+              </div>
             </div>
           </div>
 
@@ -894,10 +898,10 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                         <td>
                           <div className="appt-date">
                             <Calendar size={18} />
-                            {formatDate(appt.start_time)}, {formatTime(appt.start_time)}
+                            {formatDate(appt.startTime)}, {formatTime(appt.startTime)}
                           </div>
                         </td>
-                        <td>{appt.doctor.name}<br /><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{appt.doctor.specialization}</span></td>
+                        <td>{appt.doctor?.name || 'Doctor'}<br /><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{appt.doctor?.specialization || 'General Consultant'}</span></td>
                         <td>
                           <span className={`appt-status ${getStatusClass(appt.status)}`}>
                             {appt.status === 'completed' && <CheckCircle2 size={14} />}
@@ -987,7 +991,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                           className={`slot-btn ${book.selectedSlot === slot ? 'selected' : ''}`}
                           onClick={() => setBook(prev => ({ ...prev, selectedSlot: slot }))}
                         >
-                          {formatTime(slot.start_time)}
+                          {formatTime(slot.startTime)}
                         </button>
                       ))}
                     </div>
@@ -1011,8 +1015,8 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <div className="confirm-detail">
                   <div className="confirm-detail-row"><span>Doctor</span><span>{book.selectedDoctor.name}</span></div>
                   <div className="confirm-detail-row"><span>Specialization</span><span>{book.selectedDoctor.specialization}</span></div>
-                  <div className="confirm-detail-row"><span>Date</span><span>{formatDate(book.selectedSlot.start_time)}</span></div>
-                  <div className="confirm-detail-row"><span>Time</span><span>{formatTime(book.selectedSlot.start_time)} – {formatTime(book.selectedSlot.end_time)}</span></div>
+                  <div className="confirm-detail-row"><span>Date</span><span>{formatDate(book.selectedSlot.startTime)}</span></div>
+                  <div className="confirm-detail-row"><span>Time</span><span>{formatTime(book.selectedSlot.startTime)} – {formatTime(book.selectedSlot.endTime)}</span></div>
                 </div>
                 <div className="modal-actions">
                   <button className="btn-modal-secondary" onClick={() => setBook(prev => ({ ...prev, step: 'slot' }))}>Back</button>
@@ -1038,7 +1042,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             {reschedule.error && <div className="modal-error">{reschedule.error}</div>}
 
             <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: '0 0 20px' }}>
-              Rescheduling with <strong>{reschedule.appointment.doctor.name}</strong>
+              Rescheduling with <strong>{reschedule.appointment.doctor?.name || 'Doctor'}</strong>
             </p>
 
             <div className="date-input-group">
@@ -1063,7 +1067,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     className={`slot-btn ${reschedule.selectedSlot === slot ? 'selected' : ''}`}
                     onClick={() => setReschedule(prev => ({ ...prev, selectedSlot: slot }))}
                   >
-                    {formatTime(slot.start_time)}
+                    {formatTime(slot.startTime)}
                   </button>
                 ))}
               </div>
@@ -1092,7 +1096,7 @@ const PatientDashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <button className="modal-close" onClick={() => setCancelTarget(null)}><X size={18} /></button>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: 15, lineHeight: 1.6, margin: '0 0 24px' }}>
-              Are you sure you want to cancel your appointment with <strong>{cancelTarget.doctor.name}</strong> on <strong>{formatDate(cancelTarget.start_time)}</strong> at <strong>{formatTime(cancelTarget.start_time)}</strong>?
+              Are you sure you want to cancel your appointment with <strong>{cancelTarget.doctor?.name || 'Doctor'}</strong> on <strong>{formatDate(cancelTarget.startTime)}</strong> at <strong>{formatTime(cancelTarget.startTime)}</strong>?
             </p>
             <div className="modal-actions">
               <button className="btn-modal-secondary" onClick={() => setCancelTarget(null)}>Keep It</button>

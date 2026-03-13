@@ -8,8 +8,16 @@ export async function getUserByPhone(phone: string) {
   return prisma.user.findUnique({ where: { phone } });
 }
 
-export async function updateUser(id: string, data: { name?: string }) {
-  return prisma.user.update({ where: { id }, data });
+export async function updateUser(id: string, data: { name?: string; role?: string }) {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.role !== undefined
+        ? { role: data.role === "patient" ? null : data.role }
+        : {}),
+    },
+  });
 }
 
 export async function getAllUsers() {

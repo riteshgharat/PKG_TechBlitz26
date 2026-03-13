@@ -3,6 +3,7 @@ import { Calendar, Clock, CheckCircle2, X, Edit3, LogOut, Bell, CalendarX, Searc
 import clinicoLogo from '../assets/Clinico-removebg-preview.png';
 import { getDashboardToday, type Appointment } from '../api/dashboard';
 import { getUserProfile, updateUserProfile, deleteAccount, type UserProfile } from '../api/users';
+import ReceptionScheduleManager from './ReceptionScheduleManager';
 
 interface Props { onLogout: () => void; }
 
@@ -171,7 +172,7 @@ const ReceptionDashboard: React.FC<Props> = ({ onLogout }) => {
           <div className="top-row">
             <div className="greeting">
               <h1>{greet()}, {profile?.name || 'Receptionist'}!</h1>
-              <p>Manage today's appointments and patient flow.</p>
+              <p>Running the clinic floor.</p>
             </div>
             <button className="edit-btn" onClick={openProfile}><Edit3 size={16} /> Edit Profile</button>
           </div>
@@ -213,7 +214,7 @@ const ReceptionDashboard: React.FC<Props> = ({ onLogout }) => {
                   <tbody>
                     {filtered.map(a => (
                       <tr key={a.id}>
-                        <td><div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}><Calendar size={15} color="#2563EB" /> {fmtDate(a.start_time)}, {fmt(a.start_time)}</div></td>
+                        <td><div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}><Calendar size={15} color="#2563EB" /> {fmtDate(a.startTime)}, {fmt(a.startTime)}</div></td>
                         <td style={{ fontWeight: 700 }}>{a.doctor?.name || '—'}</td>
                         <td style={{ color: '#64748b' }}>{a.doctor?.specialization || '—'}</td>
                         <td><span className={`appt-status ${getStatusClass(a.status)}`}>{getStatusLabel(a.status)}</span></td>
@@ -224,6 +225,10 @@ const ReceptionDashboard: React.FC<Props> = ({ onLogout }) => {
                 </table>
               </div>
             )}
+          </div>
+
+          <div style={{ marginTop: 22 }}>
+            <ReceptionScheduleManager />
           </div>
         </div>
       )}

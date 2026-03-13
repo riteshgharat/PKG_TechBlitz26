@@ -8,8 +8,8 @@ export interface AppointmentDoctor {
 
 export interface Appointment {
   id: string;
-  start_time: string;
-  end_time: string;
+  startTime: string;
+  endTime: string;
   status: 'booked' | 'cancelled' | 'completed' | 'rescheduled';
   doctor: AppointmentDoctor;
 }

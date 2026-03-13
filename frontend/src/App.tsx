@@ -7,7 +7,8 @@ import ReceptionDashboard from './components/ReceptionDashboard'
 import PatientRegistration from './components/PatientRegistration'
 import DoctorRegistration from './components/DoctorRegistration'
 import ReceptionRegistration from './components/ReceptionRegistration'
-import { getToken, removeToken, getRoleFromToken } from './api/client'
+import { getToken, removeToken } from './api/client'
+import { getUserProfile } from './api/users'
 import './App.css'
 
 type UserMeta = { role: 'patient' | 'doctor' | 'receptionist'; isNewUser: boolean }
@@ -18,14 +19,28 @@ function App() {
   const [userMeta, setUserMeta] = useState<UserMeta | null>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (getToken()) {
-        const role = getRoleFromToken()
-        setUserMeta({ role, isNewUser: false }) // on refresh, skip registration
-        setIsAuthenticated(true)
+    const timer = setTimeout(async () => {
+      const token = getToken()
+
+      if (!token) {
+        setLoading(false)
+        return
       }
-      setLoading(false)
+
+      try {
+        const profile = await getUserProfile()
+        const role = (profile.role || 'patient') as UserMeta['role']
+        setUserMeta({ role, isNewUser: false })
+        setIsAuthenticated(true)
+      } catch {
+        removeToken()
+        setUserMeta(null)
+        setIsAuthenticated(false)
+      } finally {
+        setLoading(false)
+      }
     }, 3500)
+
     return () => clearTimeout(timer)
   }, [])
 
@@ -40,8 +55,13 @@ function App() {
     setIsAuthenticated(false)
   }
 
-  const handleRegistrationComplete = () => {
-    if (userMeta) setUserMeta({ ...userMeta, isNewUser: false })
+  const handleRegistrationComplete = (role?: UserMeta['role']) => {
+    if (userMeta) {
+      setUserMeta({
+        role: role || userMeta.role,
+        isNewUser: false,
+      })
+    }
   }
 
   if (loading) return <SplashScreen />
@@ -53,12 +73,12 @@ function App() {
   // New user → show role-specific registration
   if (userMeta.isNewUser) {
     if (userMeta.role === 'doctor') {
-      return <DoctorRegistration onComplete={handleRegistrationComplete} onLogout={handleLogout} />
+      return <DoctorRegistration onComplete={() => handleRegistrationComplete('doctor')} onLogout={handleLogout} />
     }
     if (userMeta.role === 'receptionist') {
-      return <ReceptionRegistration onComplete={handleRegistrationComplete} onLogout={handleLogout} />
+      return <ReceptionRegistration onComplete={() => handleRegistrationComplete('receptionist')} onLogout={handleLogout} />
     }
-    return <PatientRegistration onComplete={handleRegistrationComplete} onLogout={handleLogout} />
+    return <PatientRegistration onComplete={() => handleRegistrationComplete('patient')} onLogout={handleLogout} />
   }
 
   // Existing / registered user → role-based dashboard

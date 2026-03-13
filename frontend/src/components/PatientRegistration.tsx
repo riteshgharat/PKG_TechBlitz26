@@ -37,7 +37,7 @@ const PatientRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
     try {
       await Promise.all([
         registerPatient({ name: name.trim(), age: age ? Number(age) : undefined, gender: gender || undefined, bloodGroup: bloodGroup || undefined, address: address.trim() || undefined, medicalHistory: medicalHistory.trim() || undefined }),
-        updateUserProfile(name.trim()),
+        updateUserProfile(name.trim(), 'patient'),
       ]);
       onComplete();
     } catch (err) {
@@ -65,6 +65,18 @@ const PatientRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
 
       {/* Card */}
       <div style={styles.card}>
+        <div style={styles.heroPanel}>
+          <div>
+            <div style={styles.eyebrow}>Patient Intake</div>
+            <h1 style={styles.heroTitle}>Build your care profile</h1>
+            <p style={styles.heroCopy}>Add health basics, home details, and medical context so appointments start with the right information.</p>
+          </div>
+          <div style={styles.heroStat}>
+            <span style={styles.heroStatLabel}>Experience</span>
+            <strong style={styles.heroStatValue}>Personalized booking</strong>
+          </div>
+        </div>
+
         {/* Progress */}
         <div style={styles.progressRow}>
           {steps.map((label, i) => (
@@ -88,7 +100,7 @@ const PatientRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
             <div style={styles.fieldGrid}>
               <div style={styles.fieldFull}>
                 <label style={styles.label}>Full Name *</label>
-                <input style={styles.input} placeholder="John Doe" required value={name} onChange={e => setName(e.target.value)} autoFocus />
+                <input style={styles.input} placeholder="Rahul Sharma" required value={name} onChange={e => setName(e.target.value)} autoFocus />
               </div>
               <div>
                 <label style={styles.label}>Age</label>
@@ -114,7 +126,7 @@ const PatientRegistration: React.FC<Props> = ({ onComplete, onLogout }) => {
             <div style={styles.fieldGrid}>
               <div style={styles.fieldFull}>
                 <label style={styles.label}>Address</label>
-                <textarea style={{ ...styles.input, height: 100, resize: 'vertical' }} placeholder="123 Main Street, City, State" value={address} onChange={e => setAddress(e.target.value)} />
+                <textarea style={{ ...styles.input, height: 100, resize: 'vertical' }} placeholder="Flat No. 402, Green Valley Apartments, MG Road, Bangalore..." value={address} onChange={e => setAddress(e.target.value)} />
               </div>
             </div>
             <div style={styles.btnRow}>
@@ -164,6 +176,13 @@ const styles: Record<string, React.CSSProperties> = {
   brand: { fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: -0.5 },
   logoutBtn: { background: 'none', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#64748b', fontFamily: 'inherit' },
   card: { background: 'white', borderRadius: 24, boxShadow: '0 20px 50px rgba(37,99,235,0.1)', padding: 40, width: '100%', maxWidth: 640 },
+  heroPanel: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: 20, borderRadius: 20, background: 'linear-gradient(135deg,#eff6ff 0%,#f8fbff 100%)', border: '1px solid #dbeafe', marginBottom: 28 },
+  eyebrow: { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800, color: '#2563eb', marginBottom: 10 },
+  heroTitle: { fontSize: 28, lineHeight: 1, fontWeight: 800, color: '#0f172a', margin: '0 0 10px' },
+  heroCopy: { fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.6, maxWidth: 400 },
+  heroStat: { minWidth: 150, padding: '14px 16px', borderRadius: 16, background: 'white', border: '1px solid #bfdbfe', boxShadow: '0 8px 20px rgba(37,99,235,0.08)' },
+  heroStatLabel: { display: 'block', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', marginBottom: 8, fontWeight: 800 },
+  heroStatValue: { display: 'block', fontSize: 16, color: '#0f172a' },
   progressRow: { display: 'flex', alignItems: 'center', marginBottom: 36 },
   stepItem: { display: 'flex', alignItems: 'center', flex: 1, position: 'relative' },
   stepCircle: { width: 44, height: 44, borderRadius: '50%', border: '2px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', flexShrink: 0, zIndex: 1, background: 'white' },

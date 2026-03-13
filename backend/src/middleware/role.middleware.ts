@@ -15,7 +15,10 @@ export function roleMiddleware(...allowedRoles: string[]) {
       );
     }
 
-    if (!allowedRoles.includes(ctx.user.role)) {
+    const normalizedUserRole = String(ctx.user.role).toLowerCase();
+    const normalizedAllowedRoles = allowedRoles.map((role) => role.toLowerCase());
+
+    if (!normalizedAllowedRoles.includes(normalizedUserRole)) {
       return Response.json(
         {
           success: false,

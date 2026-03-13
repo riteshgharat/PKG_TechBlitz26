@@ -54,7 +54,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     try {
       const res = await verifyOtp(phone.trim(), otp.trim());
       setToken(res.token);
-      const userRole = (res.user.role || 'patient').toLowerCase() as LoginMeta['role'];
+      const userRole = (
+        res.user.role
+          ? res.user.role.toLowerCase()
+          : res.isNewUser
+            ? role
+            : 'patient'
+      ) as LoginMeta['role'];
       onLogin({ role: userRole, isNewUser: res.isNewUser });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid OTP. Please try again.');

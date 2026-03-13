@@ -1,4 +1,3 @@
-import React from 'react';
 import clinicoLogo from '../assets/Clinico-removebg-preview.png';
 
 const SplashScreen = () => {

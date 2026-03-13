@@ -1,8 +1,9 @@
 import { api } from './client';
 
 export interface TimeSlot {
-  start_time: string;
-  end_time: string;
+  startTime: string;
+  endTime: string;
+  available?: boolean;
 }
 
 export const getAvailableSlots = (doctorId: string, date: string) =>
