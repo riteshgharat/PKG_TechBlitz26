@@ -9,6 +9,35 @@ export function generateOtp(): string {
 }
 
 /**
+ * Send OTP via the WhatsApp channel service (fire-and-forget)
+ */
+async function sendOtpViaWhatsApp(phone: string, otp: string, expiryMinutes: number): Promise<void> {
+  const waServiceUrl = process.env.WHATSAPP_SERVICE_URL;
+  if (!waServiceUrl) return;
+
+  const message =
+    `🏥 *Clinico OTP*\n\n` +
+    `Your one-time password is: *${otp}*\n\n` +
+    `⏱ Valid for ${expiryMinutes} minutes. Do not share this code with anyone.`;
+
+  try {
+    const res = await fetch(`${waServiceUrl}/send-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, message }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      logger.warn(`WhatsApp send failed (${res.status}): ${err}`);
+    } else {
+      logger.info(`OTP sent via WhatsApp to ${phone}`);
+    }
+  } catch (err) {
+    logger.warn("WhatsApp service unreachable — OTP not delivered via WhatsApp", err);
+  }
+}
+
+/**
  * Create and store OTP for a phone number
  */
 export async function createOtp(phone: string, expiryMinutes: number = 5): Promise<string> {
@@ -29,7 +58,11 @@ export async function createOtp(phone: string, expiryMinutes: number = 5): Promi
     },
   });
 
-  logger.info(`OTP generated for ${phone}: ${otp}`); // In production, send via SMS
+  logger.info(`OTP generated for ${phone}: ${otp}`);
+
+  // Send via WhatsApp (non-blocking — failure doesn't block the response)
+  sendOtpViaWhatsApp(phone, otp, expiryMinutes);
+
   return otp;
 }
 
@@ -59,3 +92,4 @@ export async function verifyOtp(phone: string, otp: string): Promise<boolean> {
 
   return true;
 }
+

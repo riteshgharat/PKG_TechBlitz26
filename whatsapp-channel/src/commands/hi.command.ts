@@ -1,6 +1,6 @@
 export async function handleHi(jid: string): Promise<string> {
   return (
-    `🏥 *Welcome to Smart Clinic!*\n\n` +
+    `🏥 *Welcome to Clinico!*\n\n` +
     `Please choose your language:\n` +
     `1️⃣ English\n` +
     `2️⃣ Hindi\n\n` +

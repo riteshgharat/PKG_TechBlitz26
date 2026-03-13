@@ -40,6 +40,19 @@ async function handleUpdateProfile(_req: Request, ctx: RouteContext): Promise<Re
   }
 }
 
+async function handleDeleteAccount(_req: Request, ctx: RouteContext): Promise<Response> {
+  try {
+    if (!ctx.user) {
+      return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    await userService.deleteUserAccount(ctx.user.userId, ctx.user.phone);
+    return Response.json({ success: true, data: { message: "Account deleted successfully" } });
+  } catch (error) {
+    logger.error("Error deleting account", error);
+    return Response.json({ success: false, error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export const userRoutes: Route[] = [
   {
     method: "GET",
@@ -51,6 +64,12 @@ export const userRoutes: Route[] = [
     method: "PATCH",
     path: "/users/profile",
     handler: handleUpdateProfile,
+    middleware: [authMiddleware],
+  },
+  {
+    method: "DELETE",
+    path: "/users/me",
+    handler: handleDeleteAccount,
     middleware: [authMiddleware],
   },
 ];

@@ -1,12 +1,24 @@
-# 📱 WhatsApp Bot for Smart Clinic
+# 📱 WhatsApp Channel for Clinico
 
-WhatsApp automation bot built with **Baileys** that connects to the Clinic Scheduling Backend API.
+WhatsApp bot built with **whatsapp-web.js** that:
+1. Provides WhatsApp-based appointment booking interface
+2. Delivers OTP messages for web app authentication via HTTP API
+
+---
+
+## Features
+
+- **QR Code Authentication** — Link WhatsApp via QR scan (Puppeteer-based)
+- **Bot Commands** — Register, view doctors, book/cancel/reschedule appointments
+- **HTTP API Server** — Receive OTP delivery requests from backend
+- **Session Persistence** — Stores WhatsApp auth in `.wwebjs_auth/` folder
 
 ---
 
 ## Prerequisites
 
-- **Node.js** v20+ (Baileys requires Node.js, not Bun)
+- **Node.js** v20+ (whatsapp-web.js requires Node.js, not Bun)
+- **Chromium/Chrome** (auto-installed by Puppeteer)
 - Backend API running at `http://localhost:3001`
 
 ---
@@ -25,7 +37,10 @@ Edit `.env` file if needed:
 
 ```env
 BACKEND_URL=http://localhost:3001
+PORT=3002
 ```
+
+The bot runs an HTTP server on `PORT` (default: 3002) for OTP delivery.
 
 ### 3. Start the Bot
 
@@ -49,7 +64,45 @@ When you start the bot, a **QR code** will appear in the terminal.
 2. Go to **Settings → Linked Devices → Link a Device**
 3. Scan the QR code
 
-The bot will save authentication in `auth_info/` folder for future runs.
+The bot will save authentication in `.wwebjs_auth/` folder for future runs.
+
+---
+
+## HTTP API
+
+The bot exposes an HTTP server on port `3002` (configurable via `PORT` env var).
+
+### Endpoints
+
+#### `POST /send-message`
+
+Send a WhatsApp message to a phone number.
+
+**Request:**
+```json
+{
+  "to": "919876543210@s.whatsapp.net",
+  "message": "🏥 Your Clinico OTP is: 123456\n\nValid for 5 minutes."
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Message sent"
+}
+```
+
+**Response (503 Service Unavailable):**
+```json
+{
+  "success": false,
+  "error": "WhatsApp client not ready"
+}
+```
+
+**Usage:** The backend calls this endpoint to deliver OTPs via WhatsApp.
 
 ---
 
@@ -74,7 +127,7 @@ Send these commands via WhatsApp:
 ```
 User: hi
 
-Bot: 🏥 Welcome to Smart Clinic!
+Bot: 🏥 Welcome to Clinico!
      Choose your language:
      1️⃣ English
      2️⃣ Hindi
@@ -127,20 +180,15 @@ Bot: ✅ Appointment Confirmed!
 ### QR Code Not Showing
 
 - Make sure you're using **Node.js** (not Bun)
-- Delete `auth_info/` folder and retry
+- Delete `.wwebjs_auth/` folder and retry
 - Check terminal supports QR code rendering
+- Ensure Chromium is installed (auto-installed by Puppeteer)
 
-### Connection Errors (428, 405)
+### Connection Errors
 
-These errors occur when using Bun. Always use Node.js with Baileys:
-
-```bash
-# ❌ Don't use bun
-bun run src/bot.ts
-
-# ✅ Use npm/node
-npm start
-```
+- Make sure no other WhatsApp Web session is active
+- Try deleting `.wwebjs_auth/` and re-authenticating
+- Ensure you have a stable internet connection
 
 ### Backend Connection Failed
 
@@ -155,9 +203,9 @@ npm start
 ```
 whatsapp-channel/
 ├── src/
-│   ├── bot.ts                      # Entry point
+│   ├── bot.ts                      # Entry point + HTTP server
 │   ├── connection/
-│   │   └── baileys.client.ts       # WhatsApp connection with Baileys
+│   │   └── baileys.client.ts       # WhatsApp connection (deprecated)
 │   ├── handlers/
 │   │   └── message.handler.ts      # Routes messages to commands
 │   ├── services/
@@ -170,7 +218,7 @@ whatsapp-channel/
 │       ├── book.command.ts         # Book appointment
 │       ├── cancel.command.ts       # Cancel appointment
 │       └── reschedule.command.ts   # Reschedule appointment
-├── auth_info/                      # WhatsApp session data (auto-generated)
+├── .wwebjs_auth/                   # WhatsApp session data (auto-generated)
 ├── package.json
 └── .env
 ```
@@ -179,10 +227,38 @@ whatsapp-channel/
 
 ## Tech Stack
 
-- **Baileys** — WhatsApp Web API
+- **whatsapp-web.js** — WhatsApp Web API
+- **Puppeteer** — Chromium automation for WhatsApp Web
 - **Node.js** — JavaScript runtime
 - **TypeScript** — Type safety
 - **tsx** — TypeScript executor
+
+---
+
+## Integration with Backend
+
+The backend (`http://localhost:3001`) sends HTTP requests to this service to deliver OTPs:
+
+**Backend Code (otp.service.ts):**
+```typescript
+// After generating OTP
+const whatsappUrl = process.env.WHATSAPP_SERVICE_URL;
+if (whatsappUrl) {
+  fetch(`${whatsappUrl}/send-message`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: `91${phone}@s.whatsapp.net`,
+      message: `🏥 Your Clinico OTP is: ${otp}\n\nValid for ${OTP_EXPIRY_MINUTES} minutes.`
+    })
+  }).catch(error => console.error('WhatsApp delivery failed:', error));
+}
+```
+
+**Backend .env:**
+```env
+WHATSAPP_SERVICE_URL="http://localhost:3002"
+```
 
 ---
 

@@ -18,19 +18,29 @@ model User {
 }
 
 model Doctor {
-  id             String  @id @default(uuid()) @db.Uuid
-  name           String
-  specialization String?
+  id              String  @id @default(uuid()) @db.Uuid
+  name            String
+  phone           String? @unique
+  specialization  String?
+  qualifications  String?
+  experience      Int?
+  consultationFee Float?  @map("consultation_fee")
+  bio             String?
 
   @@map("doctors")
 }
 
 model Patient {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String
-  phone     String    @unique
-  language  String?   @default("en")
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  id             String    @id @default(uuid()) @db.Uuid
+  name           String
+  phone          String    @unique
+  age            Int?
+  gender         String?
+  bloodGroup     String?   @map("blood_group")
+  address        String?
+  medicalHistory String?   @map("medical_history")
+  language       String?   @default("en")
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
   @@map("patients")
 }

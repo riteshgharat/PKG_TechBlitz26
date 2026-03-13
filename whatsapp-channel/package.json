@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-channel",
   "version": "1.0.0",
-  "description": "WhatsApp bot for Smart Clinic scheduling using whatsapp-web.js",
+  "description": "WhatsApp bot for Clinico scheduling using whatsapp-web.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/bot.ts",

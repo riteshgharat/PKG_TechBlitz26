@@ -49,6 +49,9 @@ JWT_EXPIRES_IN="7d"
 PORT=3001
 OTP_EXPIRY_MINUTES=5
 NODE_ENV="development"
+
+# WhatsApp Integration
+WHATSAPP_SERVICE_URL="http://localhost:3002"
 ```
 
 ### 3. Set Up Database
@@ -134,13 +137,16 @@ backend/
 | `POST` | `/auth/request-otp` | Send OTP to phone number         |
 | `POST` | `/auth/verify-otp`  | Verify OTP and receive JWT token |
 
-### Doctors (Public)
+### Doctors
 
-| Method | Endpoint                | Description                  |
-| ------ | ----------------------- | ---------------------------- |
-| `GET`  | `/doctors`              | List all doctors             |
-| `GET`  | `/doctors/:id`          | Get doctor details           |
-| `GET`  | `/doctors/:id/schedule` | Get doctor's weekly schedule |
+| Method  | Endpoint                | Auth | Description                        |
+| ------- | ----------------------- | ---- | ---------------------------------- |
+| `GET`   | `/doctors`              | No   | List all doctors                   |
+| `GET`   | `/doctors/me`           | Yes  | Get current doctor's profile       |
+| `POST`  | `/doctors/me`           | Yes  | Create doctor profile              |
+| `PATCH` | `/doctors/me`           | Yes  | Update doctor profile              |
+| `GET`   | `/doctors/:id`          | No   | Get doctor details by ID           |
+| `GET`   | `/doctors/:id/schedule` | No   | Get doctor's weekly schedule       |
 
 ### Appointments
 
@@ -168,12 +174,15 @@ backend/
 
 ### Users & Patients
 
-| Method  | Endpoint            | Auth | Description                    |
-| ------- | ------------------- | ---- | ------------------------------ |
-| `GET`   | `/users/profile`    | Yes  | Get current user profile       |
-| `PATCH` | `/users/profile`    | Yes  | Update user name               |
-| `GET`   | `/patients`         | No   | List all patients              |
-| `GET`   | `/patients/profile` | Yes  | Get patient profile (by phone) |
+| Method   | Endpoint            | Auth | Description                    |
+| -------- | ------------------- | ---- | ------------------------------ |
+| `GET`    | `/users/profile`    | Yes  | Get current user profile       |
+| `PATCH`  | `/users/profile`    | Yes  | Update user name               |
+| `DELETE` | `/users/me`         | Yes  | Delete account + all data      |
+| `GET`    | `/patients`         | No   | List all patients              |
+| `GET`    | `/patients/profile` | Yes  | Get patient profile (by phone) |
+| `POST`   | `/patients/profile` | Yes  | Create patient profile         |
+| `PATCH`  | `/patients/profile` | Yes  | Update patient profile         |
 
 ### Health
 
@@ -212,10 +221,31 @@ If a conflict is detected, the API returns:
 ## Authentication Flow
 
 1. **Request OTP** → `POST /auth/request-otp` with `{ "phone": "9876543210" }`
-   - In development mode, the OTP is returned in the response
+   - Backend generates 6-digit OTP
+   - OTP is sent to WhatsApp via HTTP call to `WHATSAPP_SERVICE_URL/send-message`
+   - In development mode, the OTP is also logged to console
 2. **Verify OTP** → `POST /auth/verify-otp` with `{ "phone": "9876543210", "otp": "123456" }`
-   - Returns a JWT token
+   - Returns: `{ token, user: { id, phone, name, role }, isNewUser: boolean }`
+   - `isNewUser` is `true` if `user.name === normalizedPhone` (default name on first login)
 3. **Use Token** → Include in header: `Authorization: Bearer <token>`
+   - JWT payload contains: `{ userId, phone, role }`
+
+## WhatsApp Integration
+
+The backend integrates with the WhatsApp bot service for OTP delivery.
+
+When a user requests an OTP:
+1. Backend generates OTP and stores it in `otp_verifications` table
+2. Backend makes HTTP POST to `${WHATSAPP_SERVICE_URL}/send-message`:
+   ```json
+   {
+     "to": "919876543210@s.whatsapp.net",
+     "message": "🏥 Your Clinico OTP is: 123456\n\nValid for 5 minutes."
+   }
+   ```
+3. WhatsApp bot sends the message via WhatsApp Web
+
+**Note:** If `WHATSAPP_SERVICE_URL` is not configured or the service is down, OTPs are only logged to console.
 
 ---
 
@@ -224,15 +254,15 @@ If a conflict is detected, the API returns:
 | Table               | Description                                              |
 | ------------------- | -------------------------------------------------------- |
 | `users`             | User accounts (phone, name, role)                        |
-| `doctors`           | Doctor profiles (name, specialization)                   |
-| `patients`          | Patient profiles (name, phone, language)                 |
+| `doctors`           | Doctor profiles (name, phone, specialization, qualifications, experience, consultation_fee, bio) |
+| `patients`          | Patient profiles (name, phone, age, gender, blood_group, address, medical_history, language) |
 | `doctor_schedule`   | Weekly availability (day, start/end time, slot duration) |
 | `appointments`      | Booked appointments (doctor, patient, time, status)      |
 | `otp_verifications` | OTP codes for phone verification                         |
 
 **Appointment statuses:** `booked`, `cancelled`, `completed`, `rescheduled`
 
-**User roles:** `doctor`, `receptionist`, or `null` (patient)
+**User roles:** `doctor`, `receptionist`, `PATIENT` (default)
 
 ---
 
